@@ -1,0 +1,29 @@
+{"campaign": "Codewind","data-created-timestamp": "2020/01/17:10:19:44", 
+    "get-data-type": "EclispePluginMarketplaceMetrics",
+    "data": {
+        "month-now": {
+            "Date": "January 2020",
+            "ranking": {
+                "current-value": 259,
+                "of-total-plugins": 825
+            },
+            "Installs": {
+                "current-value": 69,
+                "percentage-of-all-installs": 0.03
+            },
+            "Clickthroughs": 8
+        },
+        "month-1": {
+            "Date": "December 2019",
+            "ranking": {
+                "current-value": 256,
+                "of-total-plugins": 876
+            },
+            "Installs": {
+                "current-value": 132,
+                "percentage-of-all-installs": 0.03
+            },
+            "Clickthroughs": 29
+        }
+    }
+} 
