@@ -48,7 +48,7 @@ module.exports = function (app) {
         );
         parser.end();
     
-        res.status(200).send(metrics);
+        res.status(200).json(metrics);
     
     });
 
