@@ -12,15 +12,28 @@ const parser = new htmlparser2.Parser(
       },
       ontext(text) {
           if (text.includes("statistics")) {
-              //console.log("-->", text);
               const obj = JSON.parse(text);
-              // console.log("Vscode Marketplace metrics:")
-              // console.log(timestamp.utc('YYYY/MM/DD:HH:mm:ss'));
-              // console.log(obj.statistics);
               metrics.campaign = "Codewind";
               metrics.getDataType = "VSCodePluginMarketplaceMetrics"
               metrics.dataCreatedTimestamp = timestamp.utc('YYYY/MM/DD:HH:mm:ss');
-              metrics.metrics = obj.statistics;
+              //metrics.metrics = obj.statistics;
+              // loop through obj.statistics and push
+              for (i = 0; i < obj.statistics.length; i++) {
+
+                //console.log(obj.statistics[i]);
+                var statValue = obj.statistics[i].value
+                //var statValueString = statValue.toString();
+                var statName = obj.statistics[i].statisticName
+                //var stat = { statName: statName, statValue: statValue }
+                console.log(statName+" "+statValue);
+                //metrics.metrics[i] = statValue;
+                if ( i == 0 ) {
+                  metrics.install = statValue;
+                } else if ( i == 1 ) {
+                  metrics.averagerating = statValue;
+                }
+              }
+              
           }
       },
       onclosetag(tagname) {
@@ -47,9 +60,9 @@ module.exports = function (app) {
             body, metrics
         );
         parser.end();
-        var niksJson = { nik: "yep", Andy: "nope" }
-        //res.status(200).json(metrics);
-        res.status(200).json(niksJson);
+        //var niksJson = { nik: "yep", Andy: "nope" }
+        //res.status(200).json(niksJson);
+        res.status(200).json(metrics);
     });
 
   });
