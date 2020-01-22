@@ -47,9 +47,9 @@ module.exports = function (app) {
             body, metrics
         );
         parser.end();
-    
-        res.status(200).json(metrics);
-    
+        var niksJson = { nik: "yep", Andy: "nope" }
+        //res.status(200).json(metrics);
+        res.status(200).json(niksJson);
     });
 
   });
