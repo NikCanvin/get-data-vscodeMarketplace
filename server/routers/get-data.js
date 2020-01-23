@@ -3,6 +3,7 @@ var request = require('request');
 const timestamp = require('time-stamp');
 var htmlparser2 = require("htmlparser2");
 var metrics = {};
+var responseData = "";
 
 module.exports = function (app) {
   const router = express.Router();
@@ -64,15 +65,18 @@ module.exports = function (app) {
         var foundMetrics="no";
         var gotData;
         var dataCreatedTimestamp = timestamp.utc('YYYY/MM/DD:HH:mm:ss');
-        var jsonOutput = { campaign: "Codewind", getDataType: "VSCodePluginMarketplaceMetrics" };
+        var jsonOutput = { campaign: "Codewind", getDataType: "VSCodePluginMarketplaceMetrics", dataSource: "https://marketplace.visualstudio.com/items?itemName=IBM.codewind" };
+
         jsonOutput.dataCreatedTimestamp = timestamp.utc('YYYY/MM/DD:HH:mm:ss');
         jsonOutput.metrics={};
         dataInstance=0;
         for (i = 0; i < bodyArray.length; i++) { // find start of metrics data table in the html
-            if ( bodyArray[i].includes("statisticName")) {
-                //console.log(bodyArray[i]);
+          if ( bodyArray[i].includes("statisticName")) {
+                console.log(bodyArray[i]);
+                responseData = bodyArray[i];
+                //responseData = "hi";
                 var splitBody = bodyArray[i].split("statistics");
-                var splitBody = splitBody[1].split(":");
+                splitBody = splitBody[1].split(":");
                 for (j = 0; j < splitBody.length; j++) {
                   if ( splitBody[j].includes("}")) {
                     var splitValue = splitBody[j].split("}")
@@ -81,7 +85,7 @@ module.exports = function (app) {
                       //var keyValuePair = { [splitKey[1]]: +splitValue[0] }
                       console.log(splitKey[1]+": "+splitValue[0]);
                       if ( splitKey[1] == "install" ) {
-                        jsonOutput.metrics.install = valueAsInteger;
+                        jsonOutput.metrics.installs = valueAsInteger;
                       } else if ( splitKey[1] == "averagerating" ) {
                         jsonOutput.metrics.averagerating = valueAsInteger;
                       } else if ( splitKey[1] == "ratingcount" ) {
@@ -102,6 +106,20 @@ module.exports = function (app) {
                     splitKey = splitBodyStr.split("--");
                   }
                 }
+            } else if ( bodyArray[i].includes("installs</span>")) {
+              var splitBody = bodyArray[i].split("not including updates.");
+              splitBody = splitBody[1].split(" ");
+              //for (j = 0; j < splitBody.length; j++) {
+                splitBody[1] = splitBody[1].replace(/,/g, "");
+                var installAsInteger = parseInt(splitBody[1]);
+                jsonOutput.metrics.installs = installAsInteger;
+              //}
+              //splitBody = splitBody[7].split(" ");
+              //for (j = 0; j < splitBody.length; j++) {
+                var averageratingAsFloat = parseFloat(splitBody[8]);
+                jsonOutput.metrics.averagerating = averageratingAsFloat;
+              //}
+              //responseData = splitBody[1];
             }
             // if ( foundMetrics=="yes" ) {
             //     if ( bodyArray[i].includes("</table>") ) {
@@ -134,6 +152,7 @@ module.exports = function (app) {
 
 
         //console.log(jsonOutput);
+        //res.send(responseData);
         res.json(jsonOutput);
     });
 
