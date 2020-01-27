@@ -8,46 +8,6 @@ var responseData = "";
 module.exports = function (app) {
   const router = express.Router();
 
-  // const parser = new htmlparser2.Parser(
-  //   {
-  //       onopentag(name, attribs) {
-  //           if (name === "script" && attribs.type === "application/json") {
-  //           }
-  //       },
-  //       ontext(text) {
-  //           if (text.includes("statistics")) {
-  //               const obj = JSON.parse(text);
-  //               metrics.campaign = "Codewind";
-  //               metrics.getDataType = "VSCodePluginMarketplaceMetrics"
-  //               metrics.dataCreatedTimestamp = timestamp.utc('YYYY/MM/DD:HH:mm:ss');
-  //               metrics.metrics = obj.statistics;
-  //               // loop through obj.statistics and push
-  //               for (i = 0; i < obj.statistics.length; i++) {
-  
-  //                 //console.log(obj.statistics[i]);
-  //                 var statValue = obj.statistics[i].value
-  //                 //var statValueString = statValue.toString();
-  //                 var statName = obj.statistics[i].statisticName
-  //                 //var stat = { statName: statName, statValue: statValue }
-  //                 console.log(statName+" "+statValue);
-  //                 //metrics.metrics[i] = statValue;
-  //                 if ( i == 0 ) {
-  //                   //metrics.install = statValue;
-  //                 } else if ( i == 1 ) {
-  //                   //metrics.averagerating = statValue;
-  //                 }
-  //               }
-                
-  //           }
-  //       },
-  //       onclosetag(tagname) {
-  //           if (tagname === "script") {
-  //           }
-  //       }
-  //   },
-  //   { decodeEntities: true }
-  // );
-
   router.get('/', function (req, res, next) {
 
     request({
@@ -56,15 +16,9 @@ module.exports = function (app) {
   
     }, function(error,response,body){
     
-        //parser.write(
-        //    body, metrics
-        //);
-        //parser.end();
 
         var bodyArray = body.split(/\r?\n/);
-        var foundMetrics="no";
-        var gotData;
-        var dataCreatedTimestamp = timestamp.utc('YYYY/MM/DD:HH:mm:ss');
+        //var dataCreatedTimestamp = timestamp.utc('YYYY/MM/DD:HH:mm:ss');
         var jsonOutput = { campaign: "Codewind", getDataType: "VSCodePluginMarketplaceMetrics", dataSource: "https://marketplace.visualstudio.com/items?itemName=IBM.codewind" };
 
         jsonOutput.dataCreatedTimestamp = timestamp.utc('YYYY/MM/DD:HH:mm:ss');
@@ -118,41 +72,28 @@ module.exports = function (app) {
               //for (j = 0; j < splitBody.length; j++) {
                 var averageratingAsFloat = parseFloat(splitBody[8]);
                 jsonOutput.metrics.averagerating = averageratingAsFloat;
-              //}
-              //responseData = splitBody[1];
+
             }
-            // if ( foundMetrics=="yes" ) {
-            //     if ( bodyArray[i].includes("</table>") ) {
-            //         foundMetrics="no";
-            //     } else {
-            //         if ( bodyArray[i].includes("thead") || bodyArray[i].includes("tbody")) { //ignore table header and body rows
-            //         } else {
-            //             // split string on <td>
-            //             gotData += bodyArray[i]+",";
-            //             
-            //             var month = splitBody[1].substring(0,splitBody[1].length-5);
-            //             var rankingData = splitBody[2].substring(0,splitBody[2].length-5);
-            //             var rankingDataPart = rankingData.split("/");
-            //             var rankingCurrentValue = rankingDataPart[0];
-            //             var rankingOfTotalPlugins = rankingDataPart[1];
-            //             var installsData = splitBody[3].substring(0,splitBody[3].length-5);
-            //             var installsDataPart = installsData.split(" ");
-            //             var installsCurrentValue = installsDataPart[0];
-            //             var percentageOfAllInstalls = installsDataPart[1].substring(1,installsDataPart[1].length-2);
-            //             var clickThroughs = splitBody[4].substring(0,splitBody[4].length-11);
-            //             var monthValue = monthNumber.toString();
-            //             var monthlyMetrics = { month: month, rankingCurrentValue: rankingCurrentValue, rankingOfTotalPlugins: rankingOfTotalPlugins, installsCurrentValue: installsCurrentValue, percentageOfAllInstalls: percentageOfAllInstalls, clickThroughs: clickThroughs };
-            //             jsonOutput.metrics[monthNumber] = monthlyMetrics;
-            //             //jsonOutput.month = month;
-            //             var monthNumber = monthNumber+1;
-            //         }
-            //     }
-            // }
+
         }
 
 
-        //console.log(jsonOutput);
-        //res.send(responseData);
+        var id = timestamp.utc('YYYY/MM/DD:HH:mm:ss');
+        id = id.replace(/:/g, "");
+        id = id.replace(/\//g, "");
+        request({
+          uri: "http://datastore-default.apps.riffled.os.fyre.ibm.com/advocacy/VSCodePluginMarketplaceMetrics"+id,
+          method: "PUT",
+          headers: {
+              'Content-type': 'application/json'
+          },
+          body: jsonOutput,
+          json: true
+        }, (error, response, body) => {
+          console.log(error)
+        })
+
+
         res.json(jsonOutput);
     });
 
